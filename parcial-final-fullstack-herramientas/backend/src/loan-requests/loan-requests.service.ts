@@ -12,9 +12,9 @@ export class LoanRequestsService {
     @InjectRepository(ToolEntity) private readonly tools: Repository<ToolEntity>,
   ) {}
 
-  findAll() {
+  findAll(toolId?: number) {
     // TODO BACK-A: recibir el filtro y aplicarlo en la consulta del repositorio.
-    return this.requests.find({ relations: { tool: true }, order: { id: "ASC" } });
+    return this.requests.find({ where: toolId ? {tool: {id: toolId }} : {}, relations: { tool: true }, order: { id: "ASC" } });
   }
 
   async findOne(id: number) {
@@ -28,6 +28,9 @@ export class LoanRequestsService {
     if (!tool) throw new NotFoundException("Tool not found.");
 
     // TODO BACK-B: aplicar la regla de duración antes de guardar la solicitud.
+    if (dto.days > tool.maxLoanDays) {
+      throw new ConflictException (``);
+    }
 
     const request = this.requests.create({ purpose: dto.purpose, days: dto.days, tool });
     return this.requests.save(request);
