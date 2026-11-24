@@ -13,12 +13,16 @@ async function createLoanRequest(formData: FormData) {
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
       purpose,
-      day,
+      days,
       toolId
     }),
   });
-  if (responses.status !==201 return);
-  const created
+
+  if (response.status !==201 return);
+  const created = await response.json().catch(()=>null);
+  const id = created?.id;
+  if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1) return;
+  redirect(`/loan-request/${id}`);
 
   // TODO FRONT-B: leer el formulario, convertir los números y enviar el POST con apiFetch.
   // TODO FRONT-B: si se crea la solicitud, abrir el comprobante con el ID recibido.
